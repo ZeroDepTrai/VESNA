@@ -10,3 +10,10 @@ Visibility toggling, replacement/destruction, connected endpoints and exact nati
 Console: no runtime errors in these checks.
 Visual QA: inspected the desktop mock Drawing-trace preview. It is not a client screenshot.
 Limit: this Potassium connection exposes no screenshot tool; fresh raster inspection of the live client remains unavailable.
+
+VESNA 1.10.1 window resize
+Target inferred from reference red outline: approximately 9% wider/taller than the pictured window.
+Window: 755x493; minimum viewport 771x509. Existing typography/control sizes retained; Bento cards use the expanded canvas.
+Desktop: 2,623 assertions passed; zero surviving drawings/connections.
+Potassium PID 12036: 12,800 live checks passed; 138 drag anchors verified; 241/241 drawings removed.
+No runtime errors observed in the live test console.

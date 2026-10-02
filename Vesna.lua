@@ -14,7 +14,7 @@ local HttpService = game:GetService("HttpService")
 local V2 = Vector2.new
 local RGB = Color3.fromRGB
 local Math = {}
-local Metrics = { Width=695, Height=452, Header=38, Sidebar=158,
+local Metrics = { Width=755, Height=493, Header=38, Sidebar=158,
     Padding=14, Gap=10, RowGap=3, ToggleRow=34, SliderRow=34 }
 local function pixel(v) return V2(math.floor(v.X+0.5),math.floor(v.Y+0.5)) end
 
@@ -514,7 +514,7 @@ function Manager:Start()
     end)
 end
 
-local Library = { Version = "1.10.0", Math = Math, Metrics = Metrics }
+local Library = { Version = "1.10.1", Math = Math, Metrics = Metrics }
 
 function Library:CreateWindow(config)
     config = config or {}
@@ -522,7 +522,7 @@ function Library:CreateWindow(config)
     local camera = workspace.CurrentCamera
     assert(camera, "Vesna requires a client camera")
     local viewport = camera.ViewportSize
-    assert(viewport.X >= 711 and viewport.Y >= 468, "Vesna needs a 711x468 desktop viewport")
+    assert(viewport.X >= 771 and viewport.Y >= 509, "Vesna needs a 771x509 desktop viewport")
     local size = V2(Metrics.Width, Metrics.Height)
     assert(config.Font==nil or config.Font==0,"Font is locked to Drawing.Fonts.UI (0)")
     local position = config.Position or (viewport-size)/2

@@ -119,7 +119,7 @@ Drawing={new=function(kind)
     table.insert(drawings,data); liveDrawings=liveDrawings+1; return raw
 end}
 
-local library=assert(loadfile(arg[1] or "outputs/Vesna.luau"))()
+local library=assert(loadfile(arg[1] or "Vesna.lua"))()
 local function frame(count,dt) for _=1,count or 1 do RS.RenderStepped:Fire(dt or 1/60) end end
 local function input(kind,key,z) return {UserInputType=Enum.UserInputType[kind],KeyCode=key or Enum.KeyCode.Unknown,Position={Z=z or 0}} end
 local function down(p,processed)
@@ -169,7 +169,7 @@ local slider,scale=table.unpack(tuning.Controls)
 local dropdown,reset,bind=table.unpack(routes.Controls)
 local diagnostic=telemetry.Controls[3]
 check(hero.ColumnSpan==3 and telemetry.ColumnSpan==3,"Compact Bento geometry")
-check(w.Size.X==695 and w.Size.Y==452,"Exact 695x452 footprint")
+check(w.Size.X==755 and w.Size.Y==493,"Exact 755x493 footprint")
 for _,d in ipairs(drawings) do
     if d.Kind=="Text" then
         check(d.Font==0 and not d.Outline,"Hardcoded UI font, smooth text flags")

@@ -4,7 +4,7 @@ A zero-Instance, modular Bento-grid interface framework engineered on Luau Drawi
 
 Vesna renders and manages its interface through the executor-provided `Drawing` API. Layout, input routing, animation, persistence, and resource ownership remain outside the Roblox DataModel.
 
-This reference describes version **1.10.0**.
+This reference describes version **1.10.1**.
 
 ## Technical specification
 
@@ -12,7 +12,7 @@ This reference describes version **1.10.0**.
 |---|---|
 | Render engine | `Drawing` objects; no `ScreenGui` or `Instance.new` |
 | Layout | Six-column Bento grid with configurable card spans |
-| Window | 695 × 452px; 158px sidebar |
+| Window | 755 × 493px; 158px sidebar |
 | Palette | Onyx `#0D0E12` with Crimson Rose `#F43F5E` |
 | Typography | Drawing Font 0; integer text sizes |
 | Header logo | Twelve retained `Line` primitives; no image download |
@@ -31,7 +31,7 @@ The host must provide:
 
 - Roblox client services, including `UserInputService`, `RunService`, and `HttpService`.
 - `Drawing.new`, `ZIndex`, `Transparency`, `Visible`, and `Remove`.
-- A desktop viewport of at least 711 × 468px.
+- A desktop viewport of at least 771 × 509px.
 - `loadstring` and `game:HttpGet` for the remote bootstrap below.
 - Executor filesystem functions for configuration persistence.
 
@@ -45,7 +45,7 @@ Callbacks run asynchronously and receive subsequent state changes. Set applicati
 
 ```lua
 local Vesna = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/ZeroDepTrai/VESNA/main/Vesna.luau"
+    "https://raw.githubusercontent.com/ZeroDepTrai/VESNA/main/Vesna.lua"
 ))()
 
 Vesna:Unload()
@@ -699,7 +699,7 @@ Run the desktop suite from a checkout:
 
 ```sh
 mkdir work
-lua Vesna.test.lua Vesna.luau work
+lua Vesna.test.lua Vesna.lua work
 ```
 
 Desktop previews simulate Drawing output. The connected Potassium tooling provided execution and console inspection, but no client screenshot capture. These checks verify runtime behavior, geometry, and resource cleanup; they do not establish identical rasterization across Drawing hosts.
