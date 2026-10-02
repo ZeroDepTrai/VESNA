@@ -1,4 +1,4 @@
--- Vesna / Drawing-only Crimson Rose Bento UI / 1.9
+-- Vesna / Drawing-only Crimson Rose Bento UI / 1.10
 -- Host contract: Drawing.new supports Square, Text, Circle, Line, ZIndex,
 -- Transparency (1 = opaque), Visible and :Remove(). No Roblox GUI instances.
 -- All geometry uses screen coordinates. MouseOffset adapts viewport-space hosts.
@@ -222,6 +222,7 @@ local Keybind = setmetatable({}, { __index = Control }); Keybind.__index = Keybi
 local Button = setmetatable({}, { __index = Control }); Button.__index = Button
 local Label = setmetatable({}, { __index = Control }); Label.__index = Label
 local Profile = setmetatable({}, { __index = Node }); Profile.__index = Profile
+local VectorLogo = setmetatable({}, { __index = Node }); VectorLogo.__index = VectorLogo
 
 local function init(object, parent, class)
     setmetatable(object, class)
@@ -248,8 +249,6 @@ function Node:Destroy()
     -- its target image; completion also checks Destroyed after every yield.
     if self.AvatarTask and task.cancel then pcall(task.cancel,self.AvatarTask) end
     self.AvatarTask=nil
-    if self.LogoTask and task.cancel then pcall(task.cancel,self.LogoTask) end
-    self.LogoTask=nil
     local window = self.Window
     if Manager.Capture and Manager.Capture.Owner == self then Manager.Capture = nil end
     if window.Popup == self then window.Popup = nil end
@@ -515,8 +514,7 @@ function Manager:Start()
     end)
 end
 
-local Library = { Version = "1.9.0", Math = Math, Metrics = Metrics,
-    LogoURL = "https://raw.githubusercontent.com/ZeroDepTrai/VESNA/main/assets/vesna_logo.png" }
+local Library = { Version = "1.10.0", Math = Math, Metrics = Metrics }
 
 function Library:CreateWindow(config)
     config = config or {}
@@ -558,7 +556,7 @@ function Library:CreateWindow(config)
         for _,key in ipairs({"Title","Sub1","Sub2","CancelText","UnloadText"}) do
             window.ModalDraw[key]=Paint.make(window,"Text")
         end
-        window:CreateLogo(config.LogoURL or Library.LogoURL, config.LogoPath or "assets/vesna_logo.png")
+        window:CreateLogo()
         window.Profile = window:CreateProfile({Callback=config.ProfileCallback})
         window:CreateConfigManager()
         table.insert(Manager.Windows, window)
@@ -568,46 +566,39 @@ function Library:CreateWindow(config)
     end)
 end
 
--- One retained Image: loading never allocates a second image or touches a dead owner.
-function Window:CreateLogo(url, path)
-    local first=#self.Drawings+1
-    local ok,record=pcall(function() return Paint.make(self,"Image",{Size=V2(20,20)}) end)
-    if not ok then
-        for i=#self.Drawings,first,-1 do
-            local failed=table.remove(self.Drawings,i)
-            pcall(function() failed.Raw:Remove() end)
+-- Native 16x20 faceted emblem. Shared vertices guarantee connected endpoints.
+-- Six outer edges, four diamond edges, two axial connectors: twelve lines total.
+local logoRose,logoWhite=RGB(244,63,94),RGB(255,255,255)
+local logoVertices = {
+    V2(8,0), V2(16,5), V2(16,15), V2(8,20), V2(0,15), V2(0,5),
+    V2(8,5), V2(12,10), V2(8,15), V2(4,10),
+}
+local logoEdges = {
+    {1,2}, {2,3}, {3,4}, {4,5}, {5,6}, {6,1},
+    {7,8}, {8,9}, {9,10}, {10,7}, {1,7}, {4,9},
+}
+function Window:CreateLogo()
+    assertLive(self)
+    if self.Logo then self.Logo:Destroy() end
+    local logo=init({Lines={}},self,VectorLogo)
+    self.Logo=logo
+    return guarded(logo,function()
+        for i=1,#logoEdges do
+            logo.Lines[i]=Paint.make(logo,"Line",{
+                Thickness=1,Transparency=i>=7 and i<=10 and 0.9 or 1,
+                Color=i>=7 and i<=10 and logoWhite or logoRose,
+            })
         end
-        self.LogoStatus="unsupported"
-        return
-    end
-    self.Logo=record
-    self.LogoStatus="loading"
-    self.LogoTask=task.defer(function()
-        if self.Destroyed then return end
-        local function png(data) return type(data)=="string" and data:sub(1,8)=="\137PNG\r\n\26\n" end
-        local fetched,data=pcall(function() return game:HttpGet(url) end)
-        local source="remote"
-        if not fetched or not png(data) then
-            local env=type(getgenv)=="function" and getgenv() or _G
-            local exists,read=env.isfile or _G.isfile,env.readfile or _G.readfile
-            local success,localData=pcall(function()
-                if type(exists)=="function" and type(read)=="function" and exists(path) then return read(path) end
-            end)
-            data=success and localData or nil
-            source="local"
-        end
-        if self.Destroyed then return end
-        if png(data) then
-            local assigned,err=pcall(function() Paint.set(record,{Data=data}) end)
-            self.LogoReady=assigned
-            self.LogoStatus=assigned and "ready" or "fallback"
-            if assigned then self.LogoBytes=#data; self.LogoSource=source else self.LogoError=tostring(err) end
-        else
-            self.LogoStatus="fallback"
-            self.LogoError="No valid PNG from remote URL or local path"
-        end
-        self.LogoTask=nil
+        return logo
     end)
+end
+function VectorLogo:Render(base)
+    if self.Destroyed then return end
+    base=pixel(base)
+    for i,edge in ipairs(logoEdges) do
+        local color=i>=7 and i<=10 and logoWhite or logoRose
+        Paint.line(self,self.Lines[i],base+logoVertices[edge[1]],base+logoVertices[edge[2]],color,5)
+    end
 end
 
 function Window:CancelInteraction()
@@ -801,10 +792,8 @@ function Window:Render(dt)
     Paint.box(self, self.Bg, p, V2(s.X, height), theme.Background, 1)
     Paint.box(self, self.Edge, p, V2(s.X, height), theme.Border, 2)
     hit(self, p, V2(s.X, height), 1, "block")
-    if self.Logo and self.LogoReady then
-        Paint.show(self,self.Logo,5,{Position=p+V2(14,9),Size=V2(20,20),Transparency=1})
-    end
-    Paint.text(self, self.Brand, p+V2(self.LogoReady and 42 or 16, 11), self.Title, theme.Header, 16, 5, s.X-266)
+    if self.Logo and not self.Logo.Destroyed then self.Logo:Render(p+V2(16,9)) end
+    Paint.text(self, self.Brand, p+V2(42,11), self.Title, theme.Header, 16, 5, s.X-266)
     Paint.circle(self, self.Dot, p+V2(s.X-215, 19), 3, theme.Accent, 5)
     Paint.text(self, self.Telemetry, p+V2(s.X-205, 12), "ONLINE / "..self.FPS.." FPS", theme.Status, 13, 5, 132)
     local mouse = Manager:Mouse(self)

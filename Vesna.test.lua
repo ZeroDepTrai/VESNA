@@ -135,6 +135,33 @@ local w,state=library.DemoWindow,library.DemoSettings; frame(60)
 check(liveConnections==5,"Exactly five shared connections")
 check(w.FPS==60,"FPS telemetry")
 check(liveDrawings>0,"Drawing allocation")
+-- The header emblem owns exactly 12 retained lines and no image/network loader.
+check(w.Logo and #w.Logo.Drawings==12 and #w.Logo.Lines==12,"Twelve-line vector logo")
+check(w.LogoTask==nil and library.LogoURL==nil,"No header asset-loading work")
+local vertices={{8,0},{16,5},{16,15},{8,20},{0,15},{0,5},{8,5},{12,10},{8,15},{4,10}}
+local edges={{1,2},{2,3},{3,4},{4,5},{5,6},{6,1},{7,8},{8,9},{9,10},{10,7},{1,7},{4,9}}
+local function verifyLogo()
+    for i,edge in ipairs(edges) do
+        local line=w.Logo.Lines[i].Cache
+        local a,b=vertices[edge[1]],vertices[edge[2]]
+        check(line.From.X==w.RenderPosition.X+16+a[1] and line.From.Y==w.RenderPosition.Y+9+a[2],"Vector origin follows snapped window")
+        check(line.To.X==w.RenderPosition.X+16+b[1] and line.To.Y==w.RenderPosition.Y+9+b[2],"Connected endpoint follows snapped window")
+        check(line.Thickness==1 and line.Visible,"Visible single-pixel vector stroke")
+        local inner=i>=7 and i<=10
+        check(line.Transparency==(inner and .9 or 1),"Diamond alpha")
+        local color=inner and Color3.fromRGB(255,255,255) or Color3.fromRGB(244,63,94)
+        check(line.Color.R==color.R and line.Color.G==color.G and line.Color.B==color.B,"Exact vector palette")
+    end
+end
+verifyLogo()
+local originalPosition=w.Position
+for i=1,30 do w.Target=Vector2.new(130+i*3.25,90+i*1.75);frame();verifyLogo() end
+w.Position=originalPosition;w.Target=originalPosition;frame()
+local oldLogo=w.Logo
+local stableCount=liveDrawings
+w:CreateLogo(); frame()
+check(oldLogo.Destroyed and #oldLogo.Drawings==0 and liveDrawings==stableCount,"Logo replacement releases all twelve old lines")
+verifyLogo()
 local home=w.Tabs[1]
 local hero,telemetry,tuning,routes=table.unpack(home.Cards)
 local toggle,accent,button=table.unpack(hero.Controls)
