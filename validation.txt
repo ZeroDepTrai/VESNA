@@ -1,0 +1,11 @@
+VESNA 1.9.0 validation
+Asset: 128x128 RGBA PNG; fully transparent corners; backdrop/sparkle excluded from extraction. Locally inspected enlarged icon preview.
+Desktop: 676 assertions; 656 allocations; zero surviving drawings/connections.
+Potassium PID 29944: 10,719 live regression checks; 230/230 drawings removed.
+Live logo: remote PNG 23,544 bytes; title VESNA; 90 drag frames with exact 14px/9px header offset; 20x20 native Image.
+Fallback: local PNG loaded when HTTP failed. Temporary test file deleted.
+Destruction: loading task canceled; 290/290 native drawings removed; zero connections.
+Console: no runtime errors during these checks.
+Limit: Potassium exposes no screenshot tool in this session; no fresh raster capture/visual inspection of the live client was possible.
+Repository: https://github.com/ZeroDepTrai/VESNA
+Raw asset: https://raw.githubusercontent.com/ZeroDepTrai/VESNA/main/assets/vesna_logo.png
